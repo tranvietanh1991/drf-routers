@@ -13,4 +13,4 @@ __test__ = dict()
 
 if django.VERSION < (1, 6):
     for module in modules:
-        exec("from rest_framework_nested.tests.%s import *" % module)
+        exec("from drf_routers.tests.%s import *" % module)

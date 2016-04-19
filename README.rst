@@ -1,4 +1,4 @@
-drf-nested-routers
+drf-routers
 ======================================
 
 |build-status-image| |pypi-version|
@@ -11,9 +11,9 @@ Nested resources for the Django Rest Framework
 Requirements
 ------------
 
--  Python (2.7, 3.3, 3.4)
--  Django (1.6, 1.7, 1.8)
--  Django REST Framework (2.4, 3.0, 3.1)
+-  Python (2.7)
+-  Django (1.7, 1.8)
+-  Django REST Framework (3.0, 3.1, 3.2, 3.3)
 
 Installation
 ------------
@@ -22,7 +22,7 @@ Install using ``pip``\ …
 
 .. code:: bash
 
-    $ pip install drf-nested-routers
+    $ pip install drf-routers
 
 Example
 -------
@@ -75,8 +75,3 @@ To build the documentation:
     $ mkdocs build
 
 .. _tox: http://tox.readthedocs.org/en/latest/
-
-.. |build-status-image| image:: https://secure.travis-ci.org/alanjds/drf-nested-routers.svg?branch=master
-   :target: http://travis-ci.org/alanjds/drf-nested-routers?branch=master
-.. |pypi-version| image:: https://img.shields.io/pypi/v/drf-nested-routers.svg
-   :target: https://pypi.python.org/pypi/drf-nested-routers

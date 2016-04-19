@@ -6,7 +6,7 @@ from collections import namedtuple
 from django.test import TestCase
 from django.db import models
 from rest_framework.viewsets import ModelViewSet
-from rest_framework_nested.routers import SimpleRouter, NestedSimpleRouter
+from drf_routers.routers import SimpleRouter, NestedRouter
 from rest_framework.response import Response
 
 
@@ -49,13 +49,13 @@ else:
         def setUp(self):
             self.router = SimpleRouter()
             self.router.register(r'detail', DetailRouteViewSet)
-            self.detail_router = NestedSimpleRouter(
+            self.detail_router = NestedRouter(
                 self.router,
                 r'detail',
                 lookup='detail'
             )
             self.detail_router.register(r'list', ListRouteViewSet)
-            self.list_router = NestedSimpleRouter(
+            self.list_router = NestedRouter(
                 self.detail_router,
                 r'list',
                 lookup='list'

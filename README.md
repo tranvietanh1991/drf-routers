@@ -1,14 +1,12 @@
-**This is a work in progress. It "works for me" at www.apiregistro.com.br, 
-but I cannot warranty that it fully "works everywhere" yet. Join us on Gitter (below) if you need some help.**
-
-drf-nested-routers
+drf-routers
 =====================
 
-[![Join the chat at https://gitter.im/alanjds/drf-nested-routers](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/alanjds/drf-nested-routers?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+Sourcecode of this package is based from: https://github.com/alanjds/drf-nested-routers
 
-This package provides routers and fields to create nested resources in the [Django Rest Framework](http://django-rest-framework.org/)
+This package provides routers and fields to create grouped/nested resources in the [Django Rest Framework](http://django-rest-framework.org/)
 
 Nested resources are needed for full REST URL structure, if one resource lives inside another.
+Grouped resources allow you to group multiple resource to show in a single root api view.
 
 The following example is about Domains and DNS Nameservers. 
 There are many domains, and each domain has many nameservers. The "nameserver" resource does not
@@ -19,7 +17,7 @@ Installation
 
 You can install this library using pip:
 
-```pip install drf-nested-routers```
+```pip install drf-routers```
 
 Quickstart
 ----------
@@ -35,14 +33,14 @@ The desired URL signatures are:
 How to do it (example):
 ```python
 # urls.py
-from rest_framework_nested import routers
+from drf_routers import routers
 from views import DomainViewSet, NameserverViewSet
 (...)
 
 router = routers.SimpleRouter()
 router.register(r'domains', DomainViewSet)
 
-domains_router = routers.NestedSimpleRouter(router, r'domains', lookup='domain')
+domains_router = routers.NestedRouter(router, r'domains', lookup='domain')
 domains_router.register(r'nameservers', NameserverViewSet, base_name='domain-nameservers')
 # 'base_name' is optional. Needed only if the same viewset is registered more than once
 # Official DRF docs on this option: http://www.django-rest-framework.org/api-guide/routers/
@@ -70,7 +68,7 @@ class NameserverViewSet(viewsets.ViewSet):
 ```python
 # serializers.py
 # (needed only if you want hyperlinks for nested relations on API)
-from rest_framework_nested.relations import NestedHyperlinkedRelatedField
+from drf_routers.relations import NestedHyperlinkedRelatedField
 
 class DomainSerializer(HyperlinkedModelSerializer):
     class Meta:
@@ -107,10 +105,10 @@ Example of nested router 3 levels deep.  You can use this same logic to nest rou
 router = DefaultRouter()
 router.register(r'clients', ClientViewSet, base_name='clients')
 
-client_router = routers.NestedSimpleRouter(router, r'clients', lookup='client')
+client_router = routers.NestedRouter(router, r'clients', lookup='client')
 client_router.register(r'maildrops', MailDropViewSet, base_name='maildrops')
 
-maildrops_router = routers.NestedSimpleRouter(client_router, r'maildrops', lookup='maildrop')
+maildrops_router = routers.NestedRouter(client_router, r'maildrops', lookup='maildrop')
 maildrops_router.register(r'recipients', MailRecipientViewSet, base_name='recipients')
 
 urlpatterns = patterns (
@@ -165,22 +163,3 @@ class MailRecipientViewSet(viewsets.ViewSet):
         serializer = MailRecipientSerializer(maildrop)
         return Response(serializer.data)
 ```
-
-License
-=======
-
-This package is licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
-and can undestand more at http://choosealicense.com/licenses/apache/ on the
-sidebar notes.
-
-Apache Licence v2.0 is a MIT-like licence. This means, in plain English:
-- Its trully open source
-- You can use it as you wish, for money or not
-- You can sublicence it (change the licence!!)
-- This way, you can even use it on your closed-source project
-As long as:
-- You cannot use the authors name, logos, etc, to endorse a project
-- You keep the authors copyright notices where this code got used, even on your closed-source project
-(come on, even Microsoft kept BSD notices on Windows about its TCP/IP stack :P)

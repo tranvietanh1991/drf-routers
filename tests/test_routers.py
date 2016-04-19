@@ -6,7 +6,7 @@ from collections import namedtuple
 from django.db import models
 from django.test import TestCase
 from rest_framework.viewsets import ModelViewSet
-from rest_framework_nested.routers import SimpleRouter, NestedSimpleRouter
+from drf_routers.routers import SimpleRouter, NestedRouter
 
 
 QS = namedtuple('Queryset', ['model'])
@@ -38,9 +38,9 @@ class TestNestedSimpleRouter(TestCase):
     def setUp(self):
         self.router = SimpleRouter()
         self.router.register(r'a', AViewSet)
-        self.a_router = NestedSimpleRouter(self.router, r'a', lookup='a')
+        self.a_router = NestedRouter(self.router, r'a', lookup='a')
         self.a_router.register(r'b', BViewSet)
-        self.b_router = NestedSimpleRouter(self.a_router, r'b', lookup='b')
+        self.b_router = NestedRouter(self.a_router, r'b', lookup='b')
         self.b_router.register(r'c', CViewSet)
 
     def test_recursive_nested_simple_routers(self):
