@@ -24,9 +24,11 @@ Example:
 
         urlpatterns = router.urls
 """
-
 from __future__ import unicode_literals
+import logging
+logger = logging.getLogger(__name__)
 
+from collections import OrderedDict, namedtuple
 from rest_framework.routers import SimpleRouter, DefaultRouter
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -49,10 +51,10 @@ def reverseBase(request, view_name, absolute=False, urlconf=None, args=None, kwa
 		namespace = ''
 	else:
 		namespace = request.resolver_match.namespace + ':'
-	url = reverse(namespace + view_name, urlconf, args, kwargs, prefix, current_app);
+	rev_url = reverse(namespace + view_name, urlconf, args, kwargs, prefix, current_app);
 	if absolute:
-		url = request.build_absolute_uri(url)
-	return url;
+		rev_url = request.build_absolute_uri(rev_url)
+	return rev_url;
 
 
 class GroupedRouter(DefaultRouter):
@@ -73,10 +75,10 @@ class GroupedRouter(DefaultRouter):
 		"""
 		Return a view to use as the API root.
 		"""
-		api_root_dict = {}
+		# api_root_dict = {}
 		list_name = self.routes[0].name
-		for prefix, viewset, basename in self.registry:
-			api_root_dict[prefix] = basename, viewset  # list_name.format(basename=basename)
+		# for prefix, viewset, basename in self.registry:
+		# 	api_root_dict[prefix] = basename, viewset  # list_name.format(basename=basename)
 		routerSelf = self;
 		class_name = self.root_view_name.replace('-', '_').capitalize()
 
@@ -86,6 +88,7 @@ class GroupedRouter(DefaultRouter):
 			def get(self, request, *args, **kwargs):
 				ret = []
 				for r in routerSelf.includeRouterList:
+					logger.debug("root_view_name:%s" % r.root_view_name);
 					try:
 						ret += [{
 							'name': r.root_view_name,
@@ -94,29 +97,35 @@ class GroupedRouter(DefaultRouter):
 					except NoReverseMatch:
 						continue;
 
-				for prefix in api_root_dict:
-					basename, viewset = api_root_dict[prefix]
-					for url, mapping, name, initkwargs in routerSelf.get_routes(viewset):
-						correctName = name.format(basename=basename);
+				for api_prefix, api_viewset, api_basename in routerSelf.registry:
+					logger.debug("api_prefix=%s | api_viewset=%s | api_basename=%s"%(api_prefix, api_viewset, api_basename));
+					for route in routerSelf.get_routes(api_viewset):
+						# Only actions which actually exist on the viewset will be bound
+						mapping = routerSelf.get_method_map(api_viewset, route.mapping)
+						if not mapping:
+							continue
+
+						viewName = route.name.format(basename=api_basename);
 
 						reverseKwagrs = {};
 
-						# suffix = initkwargs.get('suffix');
+						# suffix = route.initkwargs.get('suffix');
 						# if suffix==u'List':
 						# 	pass;
 						# elif suffix==u'Instance':
 						# 	reverseKwagrs = {'pk':1}
 
-						if 'lookup' in url:
+						if 'lookup' in route.url:
 							reverseKwagrs = {'pk': 1}
 
+						logger.debug("viewName:%s" % viewName);
 						try:
 							ret += [{
-								'name': correctName,
+								'name': viewName,
 								'methods': mapping,
-								'url': reverseBase(request, correctName, absolute=True, kwargs=reverseKwagrs),
+								'url': reverseBase(request, viewName, absolute=True, kwargs=reverseKwagrs),
 								# 'url': request.build_absolute_uri(request.get_full_path()+url[1:-1].format(prefix=prefix,lookup='1',trailing_slash='/')),
-								# 'initKwagrs': str(initkwargs),
+								# 'initKwagrs': str(route.initkwargs),
 
 							}];
 						except NoReverseMatch:
